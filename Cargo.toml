@@ -1,0 +1,20 @@
+[package]
+name = "filson"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_json = { version = "1.0.88", optional = true }
+ordered-float = "3.4.0"
+pest = "2.5.4"
+pest_derive = "2.5.4"
+thiserror = "1.0.38"
+lexical = { version = "6.1.1", features = ["format"] }
+
+
+[features]
+default = ["serde_json", "collection_ordering"]
+serde_json = ["dep:serde_json"]
+collection_ordering = []

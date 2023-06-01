@@ -1,0 +1,53 @@
+expression = _{ SOI ~ not | actors | binary_operation ~ EOI }
+
+not               = { "!" ~ (binary_operation | actors) }
+binary_operation  = { binary_identifier ~ binary_body }
+binary_identifier = { "and" | "or" | "xor" }
+binary_body       = { "(" ~ (not | actors | binary_operation) ~ "," ~ (not | actors | binary_operation) ~ ")" }
+
+actors = _{ compare | intersects | is_contained | exists | is_subset | is_superset }
+
+compare      = { "compare" ~ "(" ~ string ~ operation ~ value ~ ")" }
+intersects   = { "intersects" ~ "(" ~ string ~ (collection | string) ~ ")" }
+is_contained = { "is_contained" ~ "(" ~ string ~ collection ~ ")" }
+exists       = { "exists" ~ "(" ~ string ~ ")" }
+is_superset  = { "is_superset" ~ "(" ~ string ~ (collection | string) ~ ")" }
+is_subset    = { "is_subset" ~ "(" ~ string ~ (collection | string) ~ ")" }
+
+operation = { "==" | "!=" | ">=" | "<=" | ">" | "<" }
+
+value      = _{ primitive | collection }
+primitive  = _{ null | boolean | string | float | integer }
+collection = _{ map | set | array }
+
+map      =  { "<" ~ map_body ~ ">" }
+map_body = _{ (map_pair ~ ("," ~ map_pair)*)? }
+map_pair =  { primitive ~ ":" ~ value }
+
+set                  =  { "{" ~ flat_collection_body ~ "}" }
+array                =  { "[" ~ flat_collection_body ~ "]" }
+flat_collection_body = _{ (value ~ ("," ~ value)*)? }
+
+string          =  { "\"" ~ chars? ~ "\"" }
+chars           =  { (char | escape_sequence)* }
+escape_sequence = _{ "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t" | "u" ~ ASCII_HEX_DIGIT{4}) }
+char            = _{ !("\"" | "\\") ~ utf8_character }
+
+float   = @{ integer? ~ "." ~ integer ~ (^"e" ~ integer)? }
+integer = @{ sign? ~ !separator ~ int_number ~ !separator }
+
+int_number = _{ ASCII_DIGIT+ ~ (separator ~ ASCII_DIGIT+)* }
+sign       = _{ "+" | "-" }
+separator  = _{ "_" }
+
+null    = { "null" }
+boolean = { "true" | "false" }
+
+utf8_character      = _{ !multibyte_sequence ~ ANY }
+multibyte_sequence  = _{ utf8_2byte_sequence | utf8_3byte_sequence | utf8_4byte_sequence }
+utf8_2byte_sequence = _{ ('\xC2'..'\xDF') ~ byte }
+utf8_3byte_sequence = _{ ('\xE0'..'\xEF') ~ byte ~ byte }
+utf8_4byte_sequence = _{ ('\xF0'..'\xF4') ~ byte ~ byte ~ byte }
+byte                = _{ ('\x80'..'\xBF') }
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
