@@ -58,7 +58,7 @@ fn str_intersects(left: &str, right: &str) -> bool {
     left.chars().any(|c| right_set.contains(&c))
 }
 
-fn array_is_subset(left: &Vec<DataNode>, right: &Vec<DataNode>) -> bool {
+fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
     if let Some(corner_case) = check_intersection_or_subset_corner_cases(left.iter(), right.iter())
     {
         return corner_case;
