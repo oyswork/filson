@@ -39,7 +39,7 @@ fn btreemap_intersects(
     false
 }
 
-fn array_intersects(left: &Vec<DataNode>, right: &Vec<DataNode>) -> bool {
+fn array_intersects(left: &[DataNode], right: &[DataNode]) -> bool {
     if let Some(corner_case) = check_intersection_or_subset_corner_cases(left.iter(), right.iter())
     {
         return corner_case;
@@ -120,7 +120,7 @@ pub(super) fn intersects_logic(left: &DataNode, right: &DataNode) -> bool {
 // parser won't allow for incorrect types
 // this will be called from top level actor, where it is checked if descriminants are the same
 pub(super) fn is_subset_logic(left: &DataNode, right: &DataNode) -> bool {
-    let res = match (left, right) {
+    match (left, right) {
         (DataNode::Set(left_set), DataNode::Set(right_set)) => left_set.is_subset(right_set),
         (DataNode::Array(left_arr), DataNode::Array(right_arr)) => {
             array_is_subset(left_arr, right_arr)
@@ -128,8 +128,7 @@ pub(super) fn is_subset_logic(left: &DataNode, right: &DataNode) -> bool {
         (DataNode::Map(left_map), DataNode::Map(right_map)) => map_is_subset(left_map, right_map),
         (DataNode::Str(left_str), DataNode::Str(right_str)) => right_str.contains(left_str),
         _ => unreachable!(),
-    };
-    res
+    }
 }
 
 #[cfg(test)]
