@@ -7,8 +7,7 @@ use crate::{ast::Ast, error::FilsonResult};
 pub(crate) struct FilsonParser;
 
 pub(crate) fn get_ast<'a>(inp: &'a str) -> FilsonResult<Ast<'a>> {
-    let parsing_res = FilsonParser::parse(Rule::expression, inp);
-    let pair: Pair<'a, Rule> = match parsing_res {
+    let pair: Pair<'a, Rule> = match FilsonParser::parse(Rule::expression, inp) {
         Ok(mut pairs) => pairs.next().unwrap(),
         Err(pest_err) => Err(Box::new(pest_err))?,
     };
