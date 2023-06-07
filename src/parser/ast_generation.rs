@@ -7,7 +7,10 @@ use crate::{ast::Ast, error::FilsonResult};
 pub(crate) struct FilsonParser;
 
 pub(crate) fn get_ast<'a>(inp: &'a str) -> FilsonResult<Ast<'a>> {
-    let pair: Pair<'a, Rule> = FilsonParser::parse(Rule::expression, inp)?.next().unwrap();
+    let pair: Pair<'a, Rule> = match FilsonParser::parse(Rule::expression, inp) {
+        Ok(mut pairs) => pairs.next().unwrap(),
+        Err(pest_err) => Err(Box::new(pest_err))?,
+    };
 
     fn get_ast_recursively(pair: Pair<Rule>) -> Ast {
         match pair.as_rule() {

@@ -9,7 +9,7 @@ pub enum FilsonError {
     NumberParseError(#[from] LexicalError),
 
     #[error(transparent)]
-    ParseError(#[from] PestError),
+    ParseError(#[from] Box<PestError>),
 
     #[error("Data by specified path doesn't exist.")]
     ExtractionError,
