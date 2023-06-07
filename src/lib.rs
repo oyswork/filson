@@ -15,21 +15,22 @@
 //! # Quickstart
 //!
 //! ```rust
-//!     use serde_json::json;
+//! use serde_json::json;
 //!
-//!     use filson::{Appliable, get_filter};
+//! use filson::{Appliable, get_filter};
 //!
-//!     let array_to_filter = [json!({"num": 1}), json!({"num": 2})];
+//! let array_to_filter = [json!({"num": 1}), json!({"num": 2})];
 //!
-//!     // note the json pointer syntax
-//!     let cond = r#"compare("/num" == 1)"#;
-//!     let flt = get_filter(cond).unwrap();
+//! // note the json pointer syntax
+//! // Remember that this condition may be known only at runtime
+//! let cond = r#"compare("/num" == 1)"#;
+//! let flt = get_filter(cond).unwrap();
 //!
-//!     let res = array_to_filter
-//!                 .into_iter()
-//!                 .filter(|data_point| flt.apply(data_point).unwrap_or(false))
-//!                 .collect::<Vec<_>>();
-//!     assert_eq!(res, vec![json!({"num": 1})]);
+//! let res = array_to_filter
+//!             .into_iter()
+//!             .filter(|data_point| flt.apply(data_point).unwrap_or(false))
+//!             .collect::<Vec<_>>();
+//! assert_eq!(res, vec![json!({"num": 1})]);
 //! ```
 //!
 //! # The concepts
