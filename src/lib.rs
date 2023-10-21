@@ -10,7 +10,7 @@
 //!
 //! Filson has begun as a leaning project to explore rust, so it is made to be extremely simple to both use and reason about it's code.
 //!
-//! While Filson is not made to be fast(yet), in most cases it should be fast enough™.
+//! While Filson is not made to be fast(yet), but depending on the case it may be fast enough™.
 //!
 //! # Quickstart
 //!
