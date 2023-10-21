@@ -12,24 +12,24 @@ pub trait Extractable {
     /// struct Car {
     ///     make: &'static str,
     ///     age: u8,
-    ///     milage: u64,
+    ///     mileage: u64,
     /// }
     ///
     /// let cars = vec![
     ///     Car {
     ///         make: "Ford",
     ///         age: 7,
-    ///         milage: 100000,
+    ///         mileage: 100000,
     ///     },
     ///     Car {
     ///         make: "Volvo",
     ///         age: 3,
-    ///         milage: 50000,
+    ///         mileage: 50000,
     ///     },
     ///     Car {
     ///         make: "Volvo",
     ///         age: 4,
-    ///         milage: 47000,
+    ///         mileage: 47000,
     ///     },
     /// ];
     ///
@@ -63,12 +63,12 @@ pub trait Extractable {
     ///         Car {
     ///             make: "Volvo",
     ///             age: 3,
-    ///             milage: 50000
+    ///             mileage: 50000
     ///         },
     ///         Car {
     ///             make: "Volvo",
     ///             age: 4,
-    ///             milage: 47000
+    ///             mileage: 47000
     ///         }
     ///     ]
     /// );
