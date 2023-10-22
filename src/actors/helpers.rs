@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, HashSet};
+use std::hash::Hash;
 
 use crate::DataNode;
 
@@ -10,8 +11,8 @@ use crate::DataNode;
 /// returns ```Option(bool)``` when one of the above cases is met and ```None``` when neither.
 #[inline]
 fn check_intersection_or_subset_corner_cases<T: ExactSizeIterator>(
-    left: T,
-    right: T,
+    left: &T,
+    right: &T,
 ) -> Option<bool> {
     if left.len() == 0 {
         return Some(true);
@@ -25,7 +26,8 @@ fn btreemap_intersects(
     left: &BTreeMap<DataNode, DataNode>,
     right: &BTreeMap<DataNode, DataNode>,
 ) -> bool {
-    if let Some(corner_case) = check_intersection_or_subset_corner_cases(left.iter(), right.iter())
+    if let Some(corner_case) =
+        check_intersection_or_subset_corner_cases(&left.iter(), &right.iter())
     {
         return corner_case;
     };
@@ -39,27 +41,21 @@ fn btreemap_intersects(
     false
 }
 
-fn array_intersects(left: &[DataNode], right: &[DataNode]) -> bool {
-    if let Some(corner_case) = check_intersection_or_subset_corner_cases(left.iter(), right.iter())
-    {
+fn str_array_intersects<Y, T>(mut left: T, right: T) -> bool
+where
+    Y: Eq + Hash,
+    T: ExactSizeIterator<Item = Y>,
+{
+    if let Some(corner_case) = check_intersection_or_subset_corner_cases(&left, &right) {
         return corner_case;
     };
-    let right_set = HashSet::<_>::from_iter(right);
-    left.iter().any(|element| right_set.contains(element))
-}
-
-fn str_intersects(left: &str, right: &str) -> bool {
-    if let Some(corner_case) =
-        check_intersection_or_subset_corner_cases(left.as_bytes().iter(), right.as_bytes().iter())
-    {
-        return corner_case;
-    };
-    let right_set = HashSet::<_>::from_iter(right.chars());
-    left.chars().any(|c| right_set.contains(&c))
+    let right_set: HashSet<Y> = HashSet::<_>::from_iter(right);
+    left.any(|element| right_set.contains(&element))
 }
 
 fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
-    if let Some(corner_case) = check_intersection_or_subset_corner_cases(left.iter(), right.iter())
+    if let Some(corner_case) =
+        check_intersection_or_subset_corner_cases(&left.iter(), &right.iter())
     {
         return corner_case;
     };
@@ -79,7 +75,8 @@ fn map_is_subset(
     left: &BTreeMap<DataNode, DataNode>,
     right: &BTreeMap<DataNode, DataNode>,
 ) -> bool {
-    if let Some(corner_case) = check_intersection_or_subset_corner_cases(left.iter(), right.iter())
+    if let Some(corner_case) =
+        check_intersection_or_subset_corner_cases(&left.iter(), &right.iter())
     {
         return corner_case;
     };
@@ -106,12 +103,14 @@ pub(super) fn intersects_logic(left: &DataNode, right: &DataNode) -> bool {
             left_set.intersection(right_set).next().is_some()
         }
         (DataNode::Array(left_arr), DataNode::Array(right_arr)) => {
-            array_intersects(left_arr, right_arr)
+            str_array_intersects(left_arr.iter(), right_arr.iter())
         }
         (DataNode::Map(left_map), DataNode::Map(right_map)) => {
             btreemap_intersects(left_map, right_map)
         }
-        (DataNode::Str(left_str), DataNode::Str(right_str)) => str_intersects(left_str, right_str),
+        (DataNode::Str(left_str), DataNode::Str(right_str)) => {
+            str_array_intersects(left_str.bytes(), right_str.bytes())
+        }
         _ => unreachable!(),
     };
     res
@@ -230,7 +229,7 @@ mod tests_array_intersects {
         let left_arr = vec![DataNode::from(1), DataNode::from(2)];
         let right_arr = vec![DataNode::from(2), DataNode::from(4)];
 
-        assert!(array_intersects(&left_arr, &right_arr));
+        assert!(str_array_intersects(left_arr.iter(), right_arr.iter()));
     }
 
     #[test]
@@ -238,7 +237,7 @@ mod tests_array_intersects {
         let left_arr = vec![DataNode::from(1), DataNode::from(2)];
         let right_arr = vec![DataNode::from(4), DataNode::from(5)];
 
-        assert!(!array_intersects(&left_arr, &right_arr));
+        assert!(!str_array_intersects(left_arr.iter(), right_arr.iter()));
     }
 
     #[test]
@@ -246,7 +245,7 @@ mod tests_array_intersects {
         let left_arr = vec![];
         let right_arr = vec![DataNode::from(2), DataNode::from(4)];
 
-        assert!(array_intersects(&left_arr, &right_arr));
+        assert!(str_array_intersects(left_arr.iter(), right_arr.iter()));
     }
 
     #[test]
@@ -254,15 +253,15 @@ mod tests_array_intersects {
         let left_arr = vec![DataNode::from(1), DataNode::from(2), DataNode::from(3)];
         let right_arr = vec![];
 
-        assert!(!array_intersects(&left_arr, &right_arr));
+        assert!(!str_array_intersects(left_arr.iter(), right_arr.iter()));
     }
 
     #[test]
     fn test_array_intersects_both_are_empty() {
-        let left_arr = vec![];
-        let right_arr = vec![];
+        let left_arr: Vec<u8> = vec![];
+        let right_arr: Vec<u8> = vec![];
 
-        assert!(array_intersects(&left_arr, &right_arr));
+        assert!(str_array_intersects(left_arr.iter(), right_arr.iter()));
     }
 }
 
@@ -273,35 +272,35 @@ mod tests_str_intersects {
     fn test_str_intersects_both_empty() {
         let left_str = "";
         let right_str = "";
-        assert!(str_intersects(left_str, right_str));
+        assert!(str_array_intersects(left_str.bytes(), right_str.bytes()));
     }
 
     #[test]
     fn test_str_intersects_left_empty() {
         let left_str = "";
         let right_str = "hello";
-        assert!(str_intersects(left_str, right_str));
+        assert!(str_array_intersects(left_str.bytes(), right_str.bytes()));
     }
 
     #[test]
     fn test_str_intersects_right_empty() {
         let left_str = "world";
         let right_str = "";
-        assert!(!str_intersects(left_str, right_str));
+        assert!(!str_array_intersects(left_str.bytes(), right_str.bytes()));
     }
 
     #[test]
     fn test_str_no_intersection() {
         let left_str = "abc";
         let right_str = "def";
-        assert!(!str_intersects(left_str, right_str));
+        assert!(!str_array_intersects(left_str.bytes(), right_str.bytes()));
     }
 
     #[test]
     fn test_str_intersection() {
         let left_str = "abc";
         let right_str = "bcd";
-        assert!(str_intersects(left_str, right_str));
+        assert!(str_array_intersects(left_str.bytes(), right_str.bytes()));
     }
 }
 
