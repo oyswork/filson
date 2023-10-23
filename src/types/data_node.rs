@@ -153,13 +153,3 @@ impl DataNode<'_> {
         Ok(())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn fn_name() {
-        dbg!(DataNode::Array(vec![1.into()]) == DataNode::Null);
-    }
-}
