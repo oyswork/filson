@@ -97,6 +97,7 @@ fn map_is_subset(
 
 // parser won't allow for incorrect types
 // this will be called from top level actor, where it is checked if descriminants are the same
+#[inline]
 pub(super) fn intersects_logic(left: &DataNode, right: &DataNode) -> bool {
     let res = match (left, right) {
         (DataNode::Set(left_set), DataNode::Set(right_set)) => {
@@ -118,6 +119,7 @@ pub(super) fn intersects_logic(left: &DataNode, right: &DataNode) -> bool {
 
 // parser won't allow for incorrect types
 // this will be called from top level actor, where it is checked if descriminants are the same
+#[inline]
 pub(super) fn is_subset_logic(left: &DataNode, right: &DataNode) -> bool {
     match (left, right) {
         (DataNode::Set(left_set), DataNode::Set(right_set)) => left_set.is_subset(right_set),
