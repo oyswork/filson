@@ -125,7 +125,7 @@ impl<'a> From<Pair<'a, Rule>> for DataNode<'a> {
 }
 
 impl DataNode<'_> {
-    fn is_collection_type(&self) -> bool {
+    pub(crate) fn is_collection_type(&self) -> bool {
         matches!(
             self,
             DataNode::Map(_) | DataNode::Set(_) | DataNode::Array(_)
