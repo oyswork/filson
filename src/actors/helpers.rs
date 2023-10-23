@@ -22,7 +22,7 @@ fn check_intersection_or_subset_corner_cases<T: ExactSizeIterator>(
     None
 }
 
-fn btreemap_intersects(
+pub(super) fn btreemap_intersects(
     left: &BTreeMap<DataNode, DataNode>,
     right: &BTreeMap<DataNode, DataNode>,
 ) -> bool {
@@ -41,7 +41,7 @@ fn btreemap_intersects(
     false
 }
 
-fn str_array_intersects<Y, T>(mut left: T, right: T) -> bool
+pub(super) fn str_array_intersects<Y, T>(mut left: T, right: T) -> bool
 where
     Y: Eq + Hash,
     T: ExactSizeIterator<Item = Y>,
@@ -53,7 +53,7 @@ where
     left.any(|element| right_set.contains(&element))
 }
 
-fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
+pub(super) fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
     if let Some(corner_case) =
         check_intersection_or_subset_corner_cases(&left.iter(), &right.iter())
     {
@@ -71,7 +71,7 @@ fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
     false
 }
 
-fn map_is_subset(
+pub(super) fn map_is_subset(
     left: &BTreeMap<DataNode, DataNode>,
     right: &BTreeMap<DataNode, DataNode>,
 ) -> bool {
@@ -93,43 +93,6 @@ fn map_is_subset(
         }
     }
     true
-}
-
-// parser won't allow for incorrect types
-// this will be called from top level actor, where it is checked if descriminants are the same
-#[inline]
-pub(super) fn intersects_logic(left: &DataNode, right: &DataNode) -> bool {
-    let res = match (left, right) {
-        (DataNode::Set(left_set), DataNode::Set(right_set)) => {
-            left_set.intersection(right_set).next().is_some()
-        }
-        (DataNode::Array(left_arr), DataNode::Array(right_arr)) => {
-            str_array_intersects(left_arr.iter(), right_arr.iter())
-        }
-        (DataNode::Map(left_map), DataNode::Map(right_map)) => {
-            btreemap_intersects(left_map, right_map)
-        }
-        (DataNode::Str(left_str), DataNode::Str(right_str)) => {
-            str_array_intersects(left_str.bytes(), right_str.bytes())
-        }
-        _ => unreachable!(),
-    };
-    res
-}
-
-// parser won't allow for incorrect types
-// this will be called from top level actor, where it is checked if descriminants are the same
-#[inline]
-pub(super) fn is_subset_logic(left: &DataNode, right: &DataNode) -> bool {
-    match (left, right) {
-        (DataNode::Set(left_set), DataNode::Set(right_set)) => left_set.is_subset(right_set),
-        (DataNode::Array(left_arr), DataNode::Array(right_arr)) => {
-            array_is_subset(left_arr, right_arr)
-        }
-        (DataNode::Map(left_map), DataNode::Map(right_map)) => map_is_subset(left_map, right_map),
-        (DataNode::Str(left_str), DataNode::Str(right_str)) => right_str.contains(left_str),
-        _ => unreachable!(),
-    }
 }
 
 #[cfg(test)]
