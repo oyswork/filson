@@ -53,7 +53,6 @@ impl Appliable for Ast<'_> {
             }
             Ast::Intersects { lhs, rhs } => {
                 let extracted = try_extract(lhs, v)?;
-                dbg!(&extracted);
                 extracted.error_on_not_collection_or_string(FilsonError::IntersectsError)?;
                 extracted.error_on_type_mismatch(rhs)?;
                 intersects(&extracted, rhs)

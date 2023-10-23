@@ -17,11 +17,8 @@ pub enum FilsonError {
     #[error("Values are of different types.")]
     TypeError,
 
-    #[error("Ordering operations between collection types are not allowed.")]
+    #[error("Ordering operations between collection types are not allowed. Maybe you want to enable \"collection_ordering\" crate feature.")]
     OrderingProhibitedError,
-
-    #[error("It is unknown how to construct DataNode from supplied type.")]
-    DataNodeConstructionError,
 
     #[error("Can't check for intersection, since extracted data isn't array/set/map/string.")]
     IntersectsError,
