@@ -7,6 +7,15 @@ A simple DSL with dynamic strong typing that can be embedded into rust applicati
 
 The name stems from **Fil**tering j**son**s.
 
+## Known issues (in the order of priority)
+
+- Tree walking interpreter is slow, will move to VM in future
+- No extraction caching, meaning that the same value from the same data entry will be extracted as many times as it is mentioned in the filtering condition.
+- No support for datetime type, will be added in the future.
+- All of the number types are strictly 64 bit signed. Support for larger types will be added in the future.
+- All of the number types are strictly decimal, parser can't handle hex, octal or binary notation. Support will be added in the future.
+- Actors code (and DataNode) desperately needs refactoring. Right now all of the types are represented by one single enum, as the result typechecking has to be done manually. Work should be offloaded onto rust's typesystem instead.
+
 ## Primitive types
 
 - `integer` - signed 64 bit.
