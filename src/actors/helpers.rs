@@ -49,7 +49,7 @@ where
     if let Some(corner_case) = check_intersection_or_subset_corner_cases(&left, &right) {
         return corner_case;
     };
-    let right_set: HashSet<Y> = HashSet::<_>::from_iter(right);
+    let right_set: HashSet<Y> = HashSet::from_iter(right);
     left.any(|element| right_set.contains(&element))
 }
 

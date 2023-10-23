@@ -6,6 +6,7 @@ use std::{
 use crate::{
     error::FilsonResult,
     parser::{parse_float, parse_int, Rule},
+    FilsonError,
 };
 
 use ordered_float::OrderedFloat;
@@ -131,7 +132,8 @@ impl DataNode<'_> {
         )
     }
 
-    pub(crate) fn is_string_type(&self) -> bool {
+    #[inline]
+    fn is_string_type(&self) -> bool {
         matches!(self, DataNode::Str(_))
     }
 
@@ -140,6 +142,14 @@ impl DataNode<'_> {
         if discriminant(self) != discriminant(other) {
             return Err(crate::FilsonError::TypeError);
         };
+        Ok(())
+    }
+
+    #[inline]
+    pub(crate) fn error_on_not_collection_or_string(&self, err: FilsonError) -> FilsonResult<()> {
+        if !self.is_collection_type() & !self.is_string_type() {
+            return Err(err);
+        }
         Ok(())
     }
 }

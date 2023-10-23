@@ -1,6 +1,5 @@
-use std::collections::BTreeMap;
-
 use crate::{error::FilsonResult, DataNode, Extractable, FilsonError};
+use std::collections::BTreeMap;
 
 impl<'a> From<&'a serde_json::Value> for DataNode<'a> {
     fn from(value: &'a serde_json::Value) -> Self {
