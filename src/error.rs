@@ -1,7 +1,7 @@
+use crate::parser::Rule;
 use lexical::Error as LexicalError;
+use pest::error::Error as PestError;
 use thiserror::Error as ThisError;
-
-type PestError = pest::error::Error<crate::parser::Rule>;
 
 #[derive(Debug, Clone, ThisError, PartialEq, Eq)]
 pub enum FilsonError {
@@ -9,7 +9,7 @@ pub enum FilsonError {
     NumberParseError(#[from] LexicalError),
 
     #[error(transparent)]
-    ParseError(#[from] Box<PestError>),
+    ParseError(#[from] Box<PestError<Rule>>),
 
     #[error("Data by specified path doesn't exist.")]
     ExtractionError,
@@ -30,4 +30,4 @@ pub enum FilsonError {
     IsSupersetError,
 }
 
-pub(crate) type FilsonResult<T> = Result<T, FilsonError>;
+pub type FilsonResult<T> = Result<T, FilsonError>;

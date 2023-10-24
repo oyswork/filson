@@ -1,4 +1,4 @@
-use crate::{Extractable, FilsonError};
+use crate::{Extractable, FilsonResult};
 
 pub trait Appliable: Send {
     /// Most likely you will never have to implement it yourself.
@@ -57,5 +57,5 @@ pub trait Appliable: Send {
     ///
     /// assert_eq!(res, Vec::<serde_json::Value>::new());
     /// ```
-    fn apply<T: Extractable>(&self, v: &T) -> Result<bool, FilsonError>;
+    fn apply<T: Extractable>(&self, v: &T) -> FilsonResult<bool>;
 }

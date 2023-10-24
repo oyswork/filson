@@ -1,4 +1,4 @@
-use crate::{DataNode, FilsonError};
+use crate::{DataNode, FilsonResult};
 
 /// Filson can run comparisons over any data types, as long as they implement [Extractable].
 pub trait Extractable {
@@ -73,5 +73,5 @@ pub trait Extractable {
     ///     ]
     /// );
     /// ```
-    fn extract(&self, path: &str) -> Result<DataNode, FilsonError>;
+    fn extract(&self, path: &str) -> FilsonResult<DataNode>;
 }

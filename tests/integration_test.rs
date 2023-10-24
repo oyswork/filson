@@ -2,9 +2,9 @@ mod setup;
 
 mod common {
     use super::*;
-    use filson::{get_filter, Appliable, FilsonError};
+    use filson::{get_filter, Appliable, FilsonResult};
 
-    pub(super) fn run_singlet_test(singlet: &str, expected: Vec<Result<bool, FilsonError>>) {
+    pub(super) fn run_singlet_test(singlet: &str, expected: Vec<FilsonResult<bool>>) {
         let flt = get_filter(singlet).unwrap();
         let test_data = setup::get_test_data();
         let actual = test_data.iter().map(|d| flt.apply(d)).collect::<Vec<_>>();
@@ -13,7 +13,7 @@ mod common {
 
     pub(super) fn run_doublet_test<F: Fn((&str, &str)) -> String>(
         doublet: (&str, &str),
-        expected: Vec<Result<bool, FilsonError>>,
+        expected: Vec<FilsonResult<bool>>,
         construction_func: F,
     ) {
         let cond = construction_func(doublet);
@@ -25,7 +25,7 @@ mod common {
 
     pub(super) fn run_triplet_test<F: Fn((&str, &str, &str)) -> String>(
         triplet: (&str, &str, &str),
-        expected: Vec<Result<bool, FilsonError>>,
+        expected: Vec<FilsonResult<bool>>,
         construction_func: F,
     ) {
         let cond = construction_func(triplet);

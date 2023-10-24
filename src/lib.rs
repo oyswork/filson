@@ -61,10 +61,9 @@ mod traits;
 mod types;
 mod utils;
 
-use crate::error::FilsonResult;
 use crate::parser::get_ast;
 
-pub use error::FilsonError;
+pub use error::{FilsonError, FilsonResult};
 pub use traits::{Appliable, Extractable};
 pub use types::DataNode;
 

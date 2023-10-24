@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use filson::{DataNode, Extractable};
+use filson::{DataNode, Extractable, FilsonError, FilsonResult};
 
 pub(crate) struct TestStruct {
     int: i64,
@@ -13,7 +13,7 @@ pub(crate) struct TestStruct {
 }
 
 impl Extractable for TestStruct {
-    fn extract(&self, path: &str) -> Result<filson::DataNode, filson::FilsonError> {
+    fn extract(&self, path: &str) -> FilsonResult<DataNode> {
         match path {
             "int" => Ok(self.int.into()),
             "float" => Ok(self.float.into()),
@@ -38,7 +38,7 @@ impl Extractable for TestStruct {
                 .map(|x| (*x).into())
                 .collect::<Vec<_>>()
                 .into()),
-            _ => Err(filson::FilsonError::ExtractionError),
+            _ => Err(FilsonError::ExtractionError),
         }
     }
 }
