@@ -59,7 +59,6 @@ mod integrations;
 mod parser;
 mod traits;
 mod types;
-mod utils;
 
 use crate::parser::get_ast;
 
