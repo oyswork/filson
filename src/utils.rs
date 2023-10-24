@@ -5,11 +5,11 @@ use std::{
 
 use crate::{DataNode, Extractable, FilsonError};
 
-struct MaybeEntry<'a, K, V> {
+struct FalliableEntry<'a, K, V> {
     entry: Entry<'a, K, V>,
 }
 
-impl<'a, K, V> MaybeEntry<'a, K, V> {
+impl<'a, K, V> FalliableEntry<'a, K, V> {
     fn or_try_insert_with<E: Error, F: FnOnce() -> Result<V, E>>(
         self,
         default: F,
@@ -24,7 +24,7 @@ impl<'a, K, V> MaybeEntry<'a, K, V> {
     }
 }
 
-impl<'a, K, V> From<Entry<'a, K, V>> for MaybeEntry<'a, K, V> {
+impl<'a, K, V> From<Entry<'a, K, V>> for FalliableEntry<'a, K, V> {
     fn from(value: Entry<'a, K, V>) -> Self {
         Self { entry: value }
     }
@@ -35,6 +35,6 @@ pub(crate) fn try_extract_cached<'a>(
     v: &'a impl Extractable,
     cache: &'a mut HashMap<&'a str, DataNode<'a>>,
 ) -> Result<&'a DataNode<'a>, FilsonError> {
-    let val = MaybeEntry::from(cache.entry(lhs)).or_try_insert_with(|| v.extract(lhs))?;
+    let val = FalliableEntry::from(cache.entry(lhs)).or_try_insert_with(|| v.extract(lhs))?;
     Ok(val)
 }
