@@ -1,4 +1,7 @@
-use std::collections::{hash_map::Entry, HashMap};
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    error::Error,
+};
 
 use crate::{DataNode, Extractable, FilsonError};
 
@@ -7,10 +10,10 @@ struct MaybeEntry<'a, K, V> {
 }
 
 impl<'a, K, V> MaybeEntry<'a, K, V> {
-    fn or_try_insert_with<F: FnOnce() -> Result<V, FilsonError>>(
+    fn or_try_insert_with<E: Error, F: FnOnce() -> Result<V, E>>(
         self,
         default: F,
-    ) -> Result<&'a mut V, FilsonError> {
+    ) -> Result<&'a mut V, E> {
         match self.entry {
             Entry::Occupied(entry) => Ok(entry.into_mut()),
             Entry::Vacant(entry) => {
