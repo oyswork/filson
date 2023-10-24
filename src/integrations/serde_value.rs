@@ -26,7 +26,8 @@ impl<'a> From<&'a serde_json::Value> for DataNode<'a> {
 
 impl Extractable for serde_json::Value {
     fn extract(&self, path: &str) -> FilsonResult<DataNode> {
-        let v = self.pointer(path).ok_or(FilsonError::ExtractionError)?;
-        Ok(DataNode::from(v))
+        self.pointer(path)
+            .ok_or(FilsonError::ExtractionError)
+            .and_then(|v| Ok(DataNode::from(v)))
     }
 }
