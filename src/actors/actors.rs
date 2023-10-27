@@ -19,23 +19,20 @@ pub(crate) fn compare(
 }
 
 pub(crate) fn intersects(extracted_value: &DataNode, compound_or_str: &DataNode) -> bool {
-    {
-        let res = match (extracted_value, compound_or_str) {
-            (DataNode::Set(left_set), DataNode::Set(right_set)) => {
-                left_set.intersection(right_set).next().is_some()
-            }
-            (DataNode::Array(left_arr), DataNode::Array(right_arr)) => {
-                str_array_intersects(left_arr.iter(), right_arr.iter())
-            }
-            (DataNode::Map(left_map), DataNode::Map(right_map)) => {
-                btreemap_intersects(left_map, right_map)
-            }
-            (DataNode::Str(left_str), DataNode::Str(right_str)) => {
-                str_array_intersects(left_str.bytes(), right_str.bytes())
-            }
-            _ => unreachable!(),
-        };
-        res
+    match (extracted_value, compound_or_str) {
+        (DataNode::Set(left_set), DataNode::Set(right_set)) => {
+            left_set.intersection(right_set).next().is_some()
+        }
+        (DataNode::Array(left_arr), DataNode::Array(right_arr)) => {
+            str_array_intersects(left_arr.iter(), right_arr.iter())
+        }
+        (DataNode::Map(left_map), DataNode::Map(right_map)) => {
+            btreemap_intersects(left_map, right_map)
+        }
+        (DataNode::Str(left_str), DataNode::Str(right_str)) => {
+            str_array_intersects(left_str.bytes(), right_str.bytes())
+        }
+        _ => unreachable!(),
     }
 }
 
