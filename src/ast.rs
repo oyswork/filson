@@ -1,57 +1,10 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use crate::actors::{compare, intersects, is_contained, is_subset, is_superset};
 use crate::error::FilsonResult;
 use crate::types::Op;
 use crate::utils::FalliableEntry;
 use crate::{Appliable, DataNode, Extractable, FilsonError};
-
-macro_rules! run_with_caching {
-    // exists
-    ($extractable:ident, $lhs: ident, $cache:ident) => {{
-        let mut cache_borrow = $cache.borrow_mut();
-        let entry = cache_borrow.entry($lhs);
-        FalliableEntry::from(entry)
-            .or_try_insert_with(|| $extractable.extract($lhs))
-            .is_ok()
-    }};
-
-    // is_contained
-    ($extractable:ident, $lhs: ident, $rhs: ident, $cache:ident, $fn:ident) => {{
-        let mut cache_borrow = $cache.borrow_mut();
-        let entry = cache_borrow.entry($lhs);
-        let extracted =
-            FalliableEntry::from(entry).or_try_insert_with(|| $extractable.extract($lhs))?;
-        $fn(extracted, $rhs)
-    }};
-
-    // intersects, is_subset, is_superset
-    ($extractable:ident, $lhs: ident, $rhs: ident, $cache:ident, $err_type:expr, $fn:ident) => {{
-        let mut cache_borrow = $cache.borrow_mut();
-        let entry = cache_borrow.entry($lhs);
-        let extracted =
-            FalliableEntry::from(entry).or_try_insert_with(|| $extractable.extract($lhs))?;
-        extracted.error_on_not_collection_or_string($err_type)?;
-        extracted.error_on_type_mismatch($rhs)?;
-        $fn(extracted, $rhs)
-    }};
-
-    // compare
-    (#[cfg($attr: meta)], $extractable:ident, $lhs: ident, $rhs: ident, $op:ident, $cache:ident, $err_type:expr, $fn:ident) => {{
-        let mut cache_borrow = $cache.borrow_mut();
-        let entry = cache_borrow.entry($lhs);
-        let extracted =
-            FalliableEntry::from(entry).or_try_insert_with(|| $extractable.extract($lhs))?;
-        extracted.error_on_type_mismatch($rhs)?;
-        #[cfg($attr)]
-        if extracted.is_collection_type() & $op.is_ordering() {
-            return Err($err_type);
-        }
-        $fn(extracted, $op, $rhs)
-    }};
-}
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) enum Ast<'a> {
