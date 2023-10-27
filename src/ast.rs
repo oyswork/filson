@@ -85,79 +85,77 @@ pub(crate) enum Ast<'a> {
     },
 }
 
+#[inline]
+fn get_extractable<'a>(
+    cache: *mut HashMap<&'a str, DataNode<'a>>,
+    path: &'a str,
+    extractable: &'a impl Extractable,
+) -> FilsonResult<&'a mut DataNode<'a>> {
+    unsafe {
+        FalliableEntry::from((*cache).entry(path)).or_try_insert_with(|| extractable.extract(path))
+    }
+}
+
 impl Appliable for Ast<'_> {
     fn apply<T: Extractable>(&self, v: &T) -> FilsonResult<bool> {
-        let cache = Rc::new(RefCell::new(HashMap::new()));
+        let mut cache = HashMap::new();
         fn recursive_apply<'a, T: Extractable + 'a>(
             ast: &'a Ast<'a>,
             extractable: &'a T,
-            cache: Rc<RefCell<HashMap<&'a str, DataNode<'a>>>>,
+            cache: *mut HashMap<&'a str, DataNode<'a>>,
         ) -> FilsonResult<bool> {
             let res = match ast {
                 Ast::And(lhs, rhs) => {
-                    recursive_apply(lhs, extractable, cache.clone())?
-                        & recursive_apply(rhs, extractable, cache.clone())?
+                    recursive_apply(lhs, extractable, cache)?
+                        & recursive_apply(rhs, extractable, cache)?
                 }
                 Ast::Or(lhs, rhs) => {
-                    recursive_apply(lhs, extractable, cache.clone())?
-                        | recursive_apply(rhs, extractable, cache.clone())?
+                    recursive_apply(lhs, extractable, cache)?
+                        | recursive_apply(rhs, extractable, cache)?
                 }
                 Ast::Xor(lhs, rhs) => {
-                    recursive_apply(lhs, extractable, cache.clone())?
-                        ^ recursive_apply(rhs, extractable, cache.clone())?
+                    recursive_apply(lhs, extractable, cache)?
+                        ^ recursive_apply(rhs, extractable, cache)?
                 }
                 Ast::Not(inner) => !inner.apply(extractable)?,
                 Ast::Compare { lhs, op, rhs } => {
-                    run_with_caching!(
-                        #[cfg(not(feature = "collection_ordering"))],
-                        extractable,
-                        lhs,
-                        rhs,
-                        op,
-                        cache,
-                        FilsonError::OrderingProhibitedError,
-                        compare
-                    )
+                    let extracted = get_extractable(cache, lhs, extractable)?;
+                    extracted.error_on_type_mismatch(rhs)?;
+                    #[cfg(not(feature = "collections_ordering"))]
+                    if extracted.is_collection_type() & op.is_ordering() {
+                        return Err(FilsonError::OrderingProhibitedError);
+                    }
+                    compare(extracted, op, rhs)
                 }
                 Ast::Intersects { lhs, rhs } => {
-                    run_with_caching!(
-                        extractable,
-                        lhs,
-                        rhs,
-                        cache,
-                        FilsonError::IntersectsError,
-                        intersects
-                    )
+                    let extracted = get_extractable(cache, lhs, extractable)?;
+                    extracted.error_on_not_collection_or_string(FilsonError::IntersectsError)?;
+                    extracted.error_on_type_mismatch(rhs)?;
+                    intersects(extracted, rhs)
                 }
                 Ast::IsContained { lhs, rhs } => {
-                    run_with_caching!(extractable, lhs, rhs, cache, is_contained)
+                    let extracted = get_extractable(cache, lhs, extractable)?;
+                    is_contained(extracted, rhs)
                 }
                 Ast::Exists { path } => {
-                    run_with_caching!(extractable, path, cache)
+                    let extracted = get_extractable(cache, path, extractable);
+                    extracted.is_ok()
                 }
                 Ast::IsSubset { lhs, rhs } => {
-                    run_with_caching!(
-                        extractable,
-                        lhs,
-                        rhs,
-                        cache,
-                        FilsonError::IsSubsetError,
-                        is_subset
-                    )
+                    let extracted = get_extractable(cache, lhs, extractable)?;
+                    extracted.error_on_not_collection_or_string(FilsonError::IsSubsetError)?;
+                    extracted.error_on_type_mismatch(rhs)?;
+                    is_subset(extracted, rhs)
                 }
                 Ast::IsSuperset { lhs, rhs } => {
-                    run_with_caching!(
-                        extractable,
-                        lhs,
-                        rhs,
-                        cache,
-                        FilsonError::IsSupersetError,
-                        is_superset
-                    )
+                    let extracted = get_extractable(cache, lhs, extractable)?;
+                    extracted.error_on_not_collection_or_string(FilsonError::IsSupersetError)?;
+                    extracted.error_on_type_mismatch(rhs)?;
+                    is_superset(extracted, rhs)
                 }
             };
             Ok(res)
         }
-        recursive_apply(self, v, cache.clone())
+        recursive_apply(self, v, &mut cache as *mut HashMap<&str, DataNode<'_>>)
     }
 }
