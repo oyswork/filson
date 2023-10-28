@@ -51,6 +51,39 @@
 //!
 //!
 //! [Extractable] is a triat that defines how to **extract** the data from any type that implements and convert it to [DataNode]. See [examples](Extractable).
+//!
+//! # Features
+//!
+//! - ## serde_json
+//!
+//!
+//! **Enabled by default**
+//!
+//!
+//! Enables integreation with [serde_json::Value] out of the box.
+//!
+//! - ## extractable_caching
+//!
+//!
+//! **Disabled by default**
+//!
+//!
+//! If extraction is expensive or you reference the same data point multiple times in the filtering condition,
+//! you may enable this feature to avoid multiple extractions of the same data point.
+//!
+//!
+//! **Please, always benchmark first!**
+//!
+//! - ## collections_ordering
+//!
+//!
+//! **Disabled by default**
+//!
+//!
+//! Enables you to use ordering operations (>, <, >=, <=) on Container types (see language reference).
+//!
+//!
+//! **Carefull! They are ordered lexicographically!**
 
 mod actors;
 mod ast;

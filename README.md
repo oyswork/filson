@@ -10,7 +10,6 @@ The name stems from **Fil**tering j**son**s.
 ## Known issues (in the order of priority)
 
 - Tree walking interpreter is slow, will move to VM in future
-- Extraction caching is not opt in, meaning that hashing overhead will be present regardless of if it makes sense to cache at all. Will be behind the feature flag in the future.
 - No support for datetime type, will be added in the future.
 - All of the number types are strictly 64 bit signed. Support for larger types will be added in the future.
 - All of the number types are strictly decimal, parser can't handle hex, octal or binary notation. Support will be added in the future.
