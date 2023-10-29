@@ -6,13 +6,14 @@ use cfg_if::cfg_if;
 
 cfg_if! {
     if #[cfg(feature = "extraction_caching")] {
-        use crate::ast::extraction_utils_cached::{get_extractable, CacheType};
+        use crate::ast::extraction_utils_cached as extraction_utils;
         use fxhash::FxHashMap;
         use std::ptr::{addr_of_mut, NonNull};
     } else {
-        use crate::ast::extraction_utils_uncached::{get_extractable, CacheType};
+        use crate::ast::extraction_utils_uncached as extraction_utils;
     }
 }
+use extraction_utils::{get_extractable, CacheType};
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) enum Ast<'a> {
