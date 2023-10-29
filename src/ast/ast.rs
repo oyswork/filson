@@ -1,11 +1,18 @@
-#[cfg(feature = "extraction_caching")]
-use fxhash::FxHashMap;
-
 use crate::actors::{compare, intersects, is_contained, is_subset, is_superset};
-use crate::ast::extraction_utils::{get_extractable, CacheType};
 use crate::error::FilsonResult;
 use crate::types::Op;
 use crate::{Appliable, DataNode, Extractable, FilsonError};
+use cfg_if::cfg_if;
+
+cfg_if! {
+    if #[cfg(feature = "extraction_caching")] {
+        use crate::ast::extraction_utils_cached::{get_extractable, CacheType};
+        use fxhash::FxHashMap;
+        use std::ptr::{addr_of_mut, NonNull};
+    } else {
+        use crate::ast::extraction_utils_uncached::{get_extractable, CacheType};
+    }
+}
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) enum Ast<'a> {
@@ -41,12 +48,15 @@ pub(crate) enum Ast<'a> {
 
 impl Appliable for Ast<'_> {
     fn apply<T: Extractable>(&self, extractable: &T) -> FilsonResult<bool> {
-        #[cfg(feature = "extraction_caching")]
-        let mut cache_map = FxHashMap::default();
-        #[cfg(feature = "extraction_caching")]
-        let cache = Some(&mut cache_map as CacheType);
-        #[cfg(not(feature = "extraction_caching"))]
-        let cache: Option<CacheType> = None;
+        cfg_if! {
+            if #[cfg(feature = "extraction_caching")] {
+                let mut cache_map = FxHashMap::default();
+                let cache =
+                    Some(NonNull::new(addr_of_mut!(cache_map)).ok_or(FilsonError::CacheCreationError)?);
+            } else {
+                let cache: Option<CacheType> = None;
+            }
+        }
 
         fn recursive_apply<'a, T: Extractable + 'a>(
             ast: &'a Ast<'a>,

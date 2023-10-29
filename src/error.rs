@@ -28,6 +28,10 @@ pub enum FilsonError {
 
     #[error("Can't check if superset, since extracted data isn't array/set/map/string.")]
     IsSupersetError,
+
+    #[cfg(feature = "extraction_caching")]
+    #[error("Ptr to cache was null")]
+    CacheCreationError,
 }
 
 pub type FilsonResult<T> = Result<T, FilsonError>;
