@@ -1,4 +1,4 @@
-use crate::actors::{compare, intersects, is_contained, is_subset, is_superset};
+use crate::actors::traits::{Compare, Contains, Intersects, IsSubset, IsSuperset};
 use crate::error::FilsonResult;
 use crate::types::Op;
 use crate::{Appliable, DataNode, Extractable, FilsonError};
@@ -85,17 +85,17 @@ impl Appliable for Ast<'_> {
                     if extracted.is_collection_type() & op.is_ordering() {
                         return Err(FilsonError::OrderingProhibitedError);
                     }
-                    compare(&extracted, op, rhs)
+                    extracted.compare(*op, rhs)
                 }
                 Ast::Intersects { lhs, rhs } => {
                     let extracted = get_extractable(lhs, extractable, cache)?;
                     extracted.error_on_not_collection_or_string(FilsonError::IntersectsError)?;
                     extracted.error_on_type_mismatch(rhs)?;
-                    intersects(&extracted, rhs)
+                    extracted.intersects(rhs)
                 }
                 Ast::IsContained { lhs, rhs } => {
                     let extracted = get_extractable(lhs, extractable, cache)?;
-                    is_contained(&extracted, rhs)
+                    rhs.contains(&extracted)
                 }
                 Ast::Exists { path } => {
                     let extracted = get_extractable(path, extractable, cache);
@@ -105,13 +105,13 @@ impl Appliable for Ast<'_> {
                     let extracted = get_extractable(lhs, extractable, cache)?;
                     extracted.error_on_not_collection_or_string(FilsonError::IsSubsetError)?;
                     extracted.error_on_type_mismatch(rhs)?;
-                    is_subset(&extracted, rhs)
+                    extracted.is_subset(rhs)
                 }
                 Ast::IsSuperset { lhs, rhs } => {
                     let extracted = get_extractable(lhs, extractable, cache)?;
                     extracted.error_on_not_collection_or_string(FilsonError::IsSupersetError)?;
                     extracted.error_on_type_mismatch(rhs)?;
-                    is_superset(&extracted, rhs)
+                    extracted.is_superset(rhs)
                 }
             };
             Ok(res)
