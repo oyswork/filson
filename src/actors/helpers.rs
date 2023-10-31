@@ -22,7 +22,7 @@ fn check_intersection_or_subset_corner_cases<T: ExactSizeIterator>(
     None
 }
 
-pub(super) fn btreemap_intersects(
+pub(crate) fn btreemap_intersects(
     left: &BTreeMap<DataNode, DataNode>,
     right: &BTreeMap<DataNode, DataNode>,
 ) -> bool {
@@ -41,7 +41,7 @@ pub(super) fn btreemap_intersects(
     false
 }
 
-pub(super) fn str_array_intersects<Y, T>(mut left: T, right: T) -> bool
+pub(crate) fn str_array_intersects<Y, T>(mut left: T, right: T) -> bool
 where
     Y: Eq + Hash,
     T: ExactSizeIterator<Item = Y>,
@@ -53,7 +53,7 @@ where
     left.any(|element| right_set.contains(&element))
 }
 
-pub(super) fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
+pub(crate) fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
     if let Some(corner_case) =
         check_intersection_or_subset_corner_cases(&left.iter(), &right.iter())
     {
@@ -71,7 +71,7 @@ pub(super) fn array_is_subset(left: &[DataNode], right: &[DataNode]) -> bool {
     false
 }
 
-pub(super) fn map_is_subset(
+pub(crate) fn map_is_subset(
     left: &BTreeMap<DataNode, DataNode>,
     right: &BTreeMap<DataNode, DataNode>,
 ) -> bool {
