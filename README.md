@@ -13,7 +13,6 @@ The name stems from **Fil**tering j**son**s.
 - No support for datetime type, will be added in the future.
 - All of the number types are strictly 64 bit signed. Support for larger types will be added in the future.
 - All of the number types are strictly decimal, parser can't handle hex, octal or binary notation. Support will be added in the future.
-- Actors code (and DataNode) desperately needs refactoring. Right now all of the types are represented by one single enum, as the result typechecking has to be done manually. Work should be offloaded onto rust's typesystem instead.
 
 ## Primitive types
 
